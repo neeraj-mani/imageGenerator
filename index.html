@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AI Image Generator</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      body {
+        font-family: sans-serif;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        flex-direction: column;
+        gap: 50px;
+      }
+      .heading {
+        text-align: center;
+        margin-top: 50px;
+      }
+      form {
+        max-width: 600px;
+      }
+      form input {
+        font-size: 1.2rem;
+        padding: 10px 20px;
+        outline: none;
+        border: 2px solid rgba(0, 0, 0, 0.288);
+        border-radius: 5px;
+      }
+      form input:focus {
+        border-color: #6741d9;
+      }
+      .shake {
+        border-color: #f03e3e;
+        animation: shake 0.4s;
+      }
+      form button {
+        padding: 10px 20px;
+        font-size: 1.2rem;
+        border: 2px solid rgba(0, 0, 0, 0.244);
+        background-color: #6741d9;
+        color: #fff;
+        border-radius: 5px;
+      }
+      .loading {
+        height: 50px;
+        width: 50px;
+        background-color: #fff;
+        position: relative;
+        border-radius: 1000px;
+      }
+      .loading::after {
+        content: "";
+        height: 140%;
+        width: 140%;
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        border-radius: 1000px;
+        z-index: -1;
+        background: conic-gradient(transparent 45deg, #6741d9);
+        animation: rotate 2s linear infinite;
+      }
+      .image-viewer img {
+        width: 100%;
+      }
+      @media screen and (max-width: 500px) {
+        form {
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          gap: 20px;
+          flex-direction: column;
+        }
+      }
+      @keyframes rotate {
+        to {
+          transform: translate(-50%, -50%) rotate(360deg);
+        }
+      }
+      @keyframes shake {
+        20% {
+          transform: translateX(20px);
+        }
+        40% {
+          transform: translateX(-20px);
+        }
+        60% {
+          transform: translateX(20px);
+        }
+        80% {
+          transform: translateX(-20px);
+        }
+        100% {
+          transform: translateX(0px);
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <h1 class="heading">AI Image Generator</h1>
+    <form class="submit-form" action="/generate" method="post">
+      <input
+        type="text"
+        placeholder="Enter Phrase Here..."
+        name="phrase"
+        id=""
+      />
+      <button>Generate</button>
+    </form>
+    <div class="image-viewer"></div>
+    <script>
+      const submitForm = document.querySelector(".submit-form");
+      const imageViewer = document.querySelector(".image-viewer");
+      const input = submitForm.querySelector("input");
+      input.addEventListener("input", function (e) {
+        if (e.target.value) {
+          e.target.classList.remove("shake");
+        }
+      });
+      submitForm.addEventListener("submit", async function (e) {
+        e.preventDefault();
+        const value = e.target.phrase.value;
+        if (!value.trim()) {
+          e.target.phrase.classList.add("shake");
+          return;
+        }
+        imageViewer.innerHTML = `<div class="loading"></div>`;
+        console.log(value);
+        const res = await fetch("/generate", {
+          method: "POST",
+          body: JSON.stringify({
+            phrase: value,
+          }),
+          headers: {
+            "content-type": "application/json",
+          },
+        }).then((res) => res.text());
+        imageViewer.innerHTML = res;
+      });
+    </script>
+  </body>
+</html>
